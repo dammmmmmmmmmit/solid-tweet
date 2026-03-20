@@ -267,6 +267,20 @@ class CNNLSTMClassifier(nn.Module):
 
 @st.cache_resource
 def load_all_models():
+    import os
+    from huggingface_hub import hf_hub_download, snapshot_download
+    repo_id = "dammmmmmmmmmit/disaster-tweet-clf"
+    
+    # Fetch all model files if they are not already cached locally
+    files_to_download = ["rf_model.pkl", "tfidf.pkl", "vocab.pkl", "cnn_lstm.pt", "dashboard_data.json"]
+    for f in files_to_download:
+        if not os.path.exists(f):
+            hf_hub_download(repo_id=repo_id, filename=f, repo_type="model", local_dir=".")
+            
+    # Fetch the entire fine-tuned BERT folder
+    if not os.path.exists("bert_finetuned/model.safetensors"):
+        snapshot_download(repo_id=repo_id, allow_patterns="bert_finetuned/*", repo_type="model", local_dir=".")
+
     device = torch.device("cpu")
     with open("rf_model.pkl",  "rb") as f: rf    = pickle.load(f)
     with open("tfidf.pkl",     "rb") as f: tfidf = pickle.load(f)
